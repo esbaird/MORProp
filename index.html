@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOR Wealth Management — Tribal Mischief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   TOKENS — MOR palette: deep forest + warm gold
+═══════════════════════════════════════════════════ */
+:root {
+  --black:     #1C2B22;
+  --charcoal:  #243320;
+  --dark:      #1A2A1A;
+  --forest:    #2B5240;
+  --forest-lt: #3D7A5C;
+  --gold:      #B8923A;
+  --gold-lt:   #F5EDD5;
+  --gold-dim:  #8A6A28;
+  --cream:     #F7F5F0;
+  --warm:      #EDE9E1;
+  --sage:      #4A7A62;
+  --sage-lt:   #7DAE96;
+  --grey:      #5A5A4E;
+  --white:     #FFFFFF;
+  --plum:      #6D2E46;
+  --sidebar:   220px;
+  --serif:     'Cormorant Garamond', Georgia, serif;
+  --sans:      'DM Sans', 'Helvetica Neue', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--black);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════ */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar);
+  height: 100vh;
+  background: #080b07;
+  border-right: 1px solid #1a1f18;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  padding: 28px 0;
+}
+
+.sidebar-brand {
+  font-family: var(--serif);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 0 22px 24px;
+  border-bottom: 1px solid #1a1f18;
+}
+
+.sidebar-client {
+  font-family: var(--sans);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6A7A6E;
+  padding: 12px 22px 0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 0;
+  scrollbar-width: none;
+}
+.sidebar-nav::-webkit-scrollbar { display: none; }
+
+.chapter-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  border-left: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.chapter-btn.active { border-left-color: var(--gold); }
+
+.chapter-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 22px;
+  font-family: var(--sans);
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5A7A68;
+  transition: color 0.2s;
+}
+.chapter-btn:hover .chapter-label,
+.chapter-btn.active .chapter-label { color: var(--gold); }
+
+.chapter-num {
+  font-family: var(--serif);
+  font-size: 11px;
+  color: #3A5A48;
+  min-width: 16px;
+  transition: color 0.2s;
+}
+.chapter-btn.active .chapter-num { color: var(--gold-dim); }
+
+.chapter-children {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+}
+.chapter-children.expanded {
+  max-height: 200px;
+}
+.chapter-children .chapter-btn {
+  padding-left: 12px;
+}
+.chapter-children .chapter-label {
+  font-size: 8.5px;
+  color: #4A6A58;
+  padding: 6px 22px 6px 34px;
+}
+.chapter-children .chapter-num {
+  font-size: 9px;
+  color: #3A5A48;
+}
+.chapter-children .chapter-btn.active .chapter-label,
+.chapter-children .chapter-btn:hover .chapter-label {
+  color: var(--gold);
+}
+.chapter-children .chapter-btn.active .chapter-num {
+  color: var(--gold-dim);
+}
+
+.sidebar-footer {
+  padding: 18px 22px 0;
+  border-top: 1px solid #1a1f18;
+  font-family: var(--sans);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: #5A6A5E;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════
+   COUNTER + ARROWS
+═══════════════════════════════════════════════════ */
+#counter {
+  position: fixed;
+  top: 22px; right: 28px;
+  font-family: var(--serif);
+  font-size: 12px;
+  color: #7A8A7E;
+  letter-spacing: 0.08em;
+  z-index: 200;
+  transition: color 0.3s;
+}
+#counter.on-light { color: #aaa; }
+
+.nav-arrow {
+  position: fixed;
+  bottom: 28px;
+  z-index: 200;
+  background: none;
+  border: 1px solid #4A5A4E;
+  color: #7A8A7E;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nav-arrow:hover { border-color: var(--gold); color: var(--gold); }
+#nav-prev { left: calc(var(--sidebar) + 28px); }
+#nav-next { left: calc(var(--sidebar) + 72px); }
+
+/* ═══════════════════════════════════════════════════
+   STAGE & SLIDES
+═══════════════════════════════════════════════════ */
+#stage {
+  position: fixed;
+  top: 0; bottom: 0;
+  left: var(--sidebar);
+  right: 0;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transform: translateX(40px);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.slide.exit {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+/* themes */
+.slide-dark   { background: var(--charcoal); }
+.slide-darker { background: var(--dark); }
+.slide-light  { background: var(--cream); }
+.slide-off    { background: var(--warm); }
+.slide-forest { background: var(--forest); }
+
+/* ═══════════════════════════════════════════════════
+   TYPOGRAPHY UTILITIES
+═══════════════════════════════════════════════════ */
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.display {
+  font-family: var(--serif);
+  line-height: 1.0;
+}
+.body-copy {
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.65;
+}
+.caption {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* on dark (deep green — cover, close only) */
+.on-dark .eyebrow { color: var(--gold); }
+.on-dark h1, .on-dark h2, .on-dark .display { color: #F0EDE5; }
+.on-dark .body-copy { color: #A8C0B0; }
+.on-dark .caption { color: #8ABBA0; }
+
+/* on light */
+.on-light .eyebrow { color: var(--sage); }
+.on-light h1, .on-light h2, .on-light .display { color: #1A2A1A; }
+.on-light .body-copy { color: #3A3A2E; }
+.on-light .caption { color: #8A8A7E; }
+
+/* on forest (mid-dark green accent slides) */
+.on-forest .eyebrow { color: var(--sage-lt); }
+.on-forest h1, .on-forest h2, .on-forest .display { color: #F0EDE5; }
+.on-forest .body-copy { color: #8ABBA0; }
+.on-forest .caption { color: #B0D4C0; }
+
+/* ═══════════════════════════════════════════════════
+   SLIDE LAYOUTS
+═══════════════════════════════════════════════════ */
+
+/* — COVER — */
+.cover-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 80px;
+  height: 100%;
+  position: relative;
+}
+.cover-rule {
+  width: 48px;
+  height: 1px;
+  background: var(--gold);
+  margin-bottom: 28px;
+}
+.cover-title {
+  font-family: var(--serif);
+  font-size: 68px;
+  font-weight: 300;
+  color: #F0EDE5;
+  line-height: 1.0;
+  margin-bottom: 8px;
+}
+.cover-subtitle {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--gold);
+  margin-bottom: 40px;
+}
+.cover-meta {
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #8A9B8E;
+}
+.cover-bcorp-badge {
+  position: absolute;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.bcorp-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 1.5px solid #7DAE96;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.bcorp-b {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 600;
+  color: #A8D4BC;
+  line-height: 1;
+}
+.bcorp-label {
+  font-family: var(--sans);
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8ABBA0;
+}
+.cover-bg-ornament {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(135deg, transparent 60%, #0d1a0a 100%);
+  pointer-events: none;
+}
+
+/* — BIG STAT — */
+.stat-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px 80px;
+}
+.stat-number {
+  font-family: var(--serif);
+  font-size: 140px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  margin-top: 16px;
+}
+.stat-context {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  margin-top: 24px;
+  max-width: 480px;
+  line-height: 1.4;
+}
+
+/* — BENCHMARK BARS — */
+.bench-wrap {
+  display: flex;
+  flex-direction: column;
+  padding: 0 80px;
+  height: 100%;
+  justify-content: center;
+  gap: 0;
+}
+.bench-header {
+  margin-bottom: 36px;
+}
+.bench-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.bench-name {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: 160px;
+  flex-shrink: 0;
+}
+.bench-track {
+  flex: 1;
+  height: 6px;
+  background: #1a1f18;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.bench-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.bench-score {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 300;
+  width: 44px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.bench-tag {
+  font-family: var(--sans);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid;
+  border-radius: 2px;
+  width: 68px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* — SPLIT 2-COL — */
+.split-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  height: 100%;
+}
+.split-left, .split-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 60px;
+}
+.split-divider {
+  width: 1px;
+  background: #1a1f18;
+  align-self: stretch;
+}
+
+/* — PILLAR LAYOUT — */
+.pillar-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+.pillar-top {
+  padding: 48px 80px 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.pillar-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.pillar-col {
+  padding: 36px 48px;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+.pillar-col:last-child { border-right: none; }
+.pillar-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.pillar-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+.pillar-text {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #6A6A5E;
+}
+
+/* — FULL BLEED TEXT — */
+.bleed-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 80px;
+  height: 100%;
+  max-width: 760px;
+}
+
+/* — 4-PILLARS GRID — */
+.four-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: 100%;
+}
+.four-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px 48px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.four-cell:nth-child(2) { border-right: none; }
+.four-cell:nth-child(3) { border-bottom: none; }
+.four-cell:nth-child(4) { border-right: none; border-bottom: none; }
+.four-num {
+  font-family: var(--serif);
+  font-size: 80px;
+  font-weight: 300;
+  line-height: 1;
+  color: #151a12;
+  position: absolute;
+  top: 20px; right: 28px;
+}
+.four-cell-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: #F0EDE5;
+  margin-bottom: 8px;
+}
+.four-cell-sub {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8A8A7E;
+}
+.four-cell.accent .four-cell-sub { color: var(--gold-dim); }
+
+/* — PHASE TABLE — */
+.phase-wrap {
+  display: flex;
+  flex-direction: column;
+  padding: 0 80px;
+  height: 100%;
+  justify-content: center;
+}
+.phase-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 18px 0;
+}
+.phase-row:first-child { border-top: 1px solid rgba(255,255,255,0.05); }
+.phase-num-col {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--forest-lt);
+  width: 40px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.phase-name {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C0BDB5;
+  flex: 1;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+}
+.phase-detail {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 300;
+  color: #5A5A4E;
+  flex: 2;
+  display: flex;
+  align-items: center;
+}
+.phase-price {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--gold);
+  width: 120px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* — INVESTMENT SLIDE — */
+.invest-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px 80px;
+  gap: 0;
+}
+.invest-range {
+  font-family: var(--serif);
+  font-size: 96px;
+  font-weight: 300;
+  color: #F0EDE5;
+  line-height: 1;
+}
+.invest-dash {
+  font-family: var(--serif);
+  font-size: 50px;
+  color: var(--forest-lt);
+  margin: 0 8px;
+}
+.invest-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 20px;
+}
+.invest-retainer {
+  margin-top: 40px;
+  padding: 18px 40px;
+  border: 1px solid #1a1f18;
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+}
+.invest-ret-num {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: var(--sage);
+}
+.invest-ret-label {
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8A9B8E;
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* — B-CORP BURIED SLIDE — */
+.bcorp-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+.bcorp-left {
+  background: var(--forest);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+}
+.bcorp-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+}
+.bcorp-score-ring {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid var(--sage-lt);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.bcorp-score-num {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 300;
+  color: #F0EDE5;
+  line-height: 1;
+}
+.bcorp-score-sub {
+  font-family: var(--sans);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sage-lt);
+}
+
+/* — CLOSE SLIDE — */
+.close-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 80px;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════
+   ANIMATION HELPERS
+═══════════════════════════════════════════════════ */
+.slide.active .bench-fill { /* triggered by JS */ }
+
+/* label spacing */
+.mt4  { margin-top: 4px; }
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+.mt24 { margin-top: 24px; }
+.mt32 { margin-top: 32px; }
+.mt40 { margin-top: 40px; }
+.mb4  { margin-bottom: 4px; }
+.mb8  { margin-bottom: 8px; }
+.mb16 { margin-bottom: 16px; }
+.mb24 { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-brand">Tribal Mischief</div>
+  <div class="sidebar-client">MOR Wealth Management</div>
+  <div class="sidebar-nav" id="chapterNav"></div>
+  <div class="sidebar-footer">Strategic Amplification · April 2026</div>
+</nav>
+
+<!-- COUNTER -->
+<div id="counter">1 / 14</div>
+
+<!-- NAV ARROWS -->
+<button class="nav-arrow" id="nav-prev">&#8592;</button>
+<button class="nav-arrow" id="nav-next">&#8594;</button>
+
+<!-- STAGE -->
+<div id="stage">
+
+  <!-- ═══ 1. COVER ═══ -->
+  <div class="slide slide-darker on-dark" data-chapter="Introduction">
+    <div class="cover-wrap">
+      <div class="cover-bg-ornament"></div>
+      <div class="cover-rule"></div>
+      <div class="cover-title">MOR Wealth<br>Management</div>
+      <div class="cover-subtitle">Strategic Amplification Proposal</div>
+      <div class="cover-meta">Tribal Mischief &nbsp;·&nbsp; April 2026 &nbsp;·&nbsp; Confidential</div>
+      <div class="cover-bcorp-badge">
+        <div class="bcorp-circle">
+          <div class="bcorp-b">B</div>
+          <div class="bcorp-label">Certified</div>
+        </div>
+        <div class="caption on-dark" style="color:#8ABBA0; font-size:8px; letter-spacing:0.2em; text-align:center; margin-top:8px;">Score: 127.2</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 2. THE PARADOX ═══ -->
+  <div class="slide slide-light on-light" data-chapter="The Paradox">
+    <div class="bleed-wrap">
+      <div class="eyebrow mb16">The core tension</div>
+      <h1 class="display" style="font-size:58px; line-height:1.05; font-weight:300; color:#1A2A1A;">
+        MOR has a <span style="color:var(--sage); font-style:italic;">127.2</span> B Corp score.<br>
+        Almost no one knows it.
+      </h1>
+      <div class="body-copy mt32" style="font-size:15px; color:#3A3A2E; max-width:520px; line-height:1.7;">
+        Exceptional values. Rigorous impact investing. A founder who pilots Angel Flights and leads community giving.<br><br>
+        None of it is visible.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. THE NUMBER ═══ -->
+  <div class="slide slide-light on-light" data-chapter="The Gap">
+    <div class="stat-wrap">
+      <div class="eyebrow mb16">MOR's current website score</div>
+      <div class="stat-number" style="color:#1A2A1A;">12
+        <span style="font-size:60px; color:var(--sage-lt);">/33</span>
+      </div>
+      <div class="stat-label" style="color:#8A8A7E;">Features present vs. 33 benchmarked</div>
+      <div class="stat-context" style="color:#3A3A2E; font-size:18px;">Brighton Jones — a fellow B Corp — scores 29/33.<br>MOR's identity advantage is invisible.</div>
+    </div>
+  </div>
+
+  <!-- ═══ 4. BENCHMARK BARS ═══ -->
+  <div class="slide slide-off on-light" data-chapter="The Gap">
+    <div class="bench-wrap">
+      <div class="bench-header">
+        <div class="eyebrow mb12">Competitive benchmark</div>
+        <h2 class="display" style="font-size:36px; font-weight:300; color:#1A2A1A;">5 Firms · 33 Features Evaluated</h2>
+      </div>
+
+      <div class="bench-row">
+        <div class="bench-name" style="color:#2B5240;">Brighton Jones</div>
+        <div class="bench-track" style="background:#D8D4CC;"><div class="bench-fill" style="background:var(--sage);" data-pct="87.9"></div></div>
+        <div class="bench-score" style="color:#2B5240;">29</div>
+        <div class="bench-tag" style="color:var(--sage); border-color:var(--sage-lt);">B Corp ✓</div>
+      </div>
+
+      <div class="bench-row">
+        <div class="bench-name" style="color:#3A3A2E;">Veris Wealth</div>
+        <div class="bench-track" style="background:#D8D4CC;"><div class="bench-fill" style="background:#7DAE96;" data-pct="81.8"></div></div>
+        <div class="bench-score" style="color:#3A3A2E;">27</div>
+        <div class="bench-tag" style="color:#5A8A70; border-color:#B0CCC0;">B Corp ✓</div>
+      </div>
+
+      <div class="bench-row">
+        <div class="bench-name" style="color:#3A3A2E;">Wescott Financial</div>
+        <div class="bench-track" style="background:#D8D4CC;"><div class="bench-fill" style="background:#9ABFAC;" data-pct="72.7"></div></div>
+        <div class="bench-score" style="color:#3A3A2E;">24</div>
+        <div class="bench-tag" style="color:#5A8A70; border-color:#B0CCC0;">B Corp ✓</div>
+      </div>
+
+      <div class="bench-row">
+        <div class="bench-name" style="color:#8A8A7E;">Sage Financial</div>
+        <div class="bench-track" style="background:#D8D4CC;"><div class="bench-fill" style="background:#C8C4BC;" data-pct="42.4"></div></div>
+        <div class="bench-score" style="color:#8A8A7E;">14</div>
+        <div class="bench-tag" style="color:#8A8A7E; border-color:#C8C4BC; font-size:7px;">No B Corp</div>
+      </div>
+
+      <div class="bench-row">
+        <div class="bench-name" style="color:var(--plum); font-weight:500;">MOR Wealth</div>
+        <div class="bench-track" style="background:#D8D4CC;"><div class="bench-fill" style="background:var(--plum);" data-pct="36.4"></div></div>
+        <div class="bench-score" style="color:var(--plum); font-weight:500;">12</div>
+        <div class="bench-tag" style="color:var(--plum); border-color:var(--plum);">B Corp ✓</div>
+      </div>
+
+      <div class="caption mt24" style="color:#8A8A7E;">* Score out of 33 features. Partial = 0.5. Based on live site audit, April 2026.</div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. THE B CORP SLIDE ═══ -->
+  <div class="slide on-dark" data-chapter="The Opportunity">
+    <div class="bcorp-split">
+      <div class="bcorp-left">
+        <div class="bcorp-score-ring">
+          <div class="bcorp-score-num">127.2</div>
+          <div class="bcorp-score-sub">B Corp Score</div>
+        </div>
+        <div class="eyebrow mb12">MOR's strongest asset</div>
+        <h2 class="display" style="font-size:36px; font-weight:300; color:#F0EDE5; line-height:1.1;">The B Corp credential is buried on a subpage.</h2>
+        <div class="body-copy mt16" style="font-size:13px;">Brighton Jones puts theirs above the fold. Veris makes it central to their brand. Wescott turns it into a registered trademark.</div>
+      </div>
+      <div class="bcorp-right" style="background:var(--cream);">
+        <div class="eyebrow mb24" style="color:var(--sage);">What peers do with the same credential</div>
+        <div class="pillar-item" style="margin-bottom:24px;">
+          <div class="pillar-dot" style="background:var(--gold); margin-top:6px;"></div>
+          <div>
+            <div class="caption" style="color:#2B5240; margin-bottom:4px;">Brighton Jones</div>
+            <div class="body-copy" style="font-size:13px; color:#3A3A2E;">"Live a Richer Life" — B Corp badge prominently featured with $26B AUM signal</div>
+          </div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:24px;">
+          <div class="pillar-dot" style="background:var(--sage); margin-top:6px;"></div>
+          <div>
+            <div class="caption" style="color:#2B5240; margin-bottom:4px;">Veris Wealth Partners</div>
+            <div class="body-copy" style="font-size:13px; color:#3A3A2E;">"100% Impact since day 1" — B Corp is central to their entire visual identity</div>
+          </div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage); margin-top:6px;"></div>
+          <div>
+            <div class="caption" style="color:#2B5240; margin-bottom:4px;">Wescott Financial</div>
+            <div class="body-copy" style="font-size:13px; color:#3A3A2E;">"Life-Minded Wealth®" — B Corp woven into a registered brand identity</div>
+          </div>
+        </div>
+        <div style="font-family:var(--sans); font-size:13px; color:#4A7A62; border-top:1px solid #D8D4CC; padding-top:24px; margin-top:24px; font-style:italic;">MOR has the same credential — and the strongest story — with zero of the infrastructure to tell it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 6. FOUR PILLARS OVERVIEW ═══ -->
+  <div class="slide slide-darker on-dark" data-chapter="The Work">
+    <div style="display:flex; flex-direction:column; justify-content:center; height:100%; padding:0 80px;">
+      <div style="margin-bottom:32px;">
+        <div class="eyebrow mb12" style="color:var(--gold);">The Tribal Mischief Engagement</div>
+        <h2 class="display" style="font-size:38px; font-weight:300; color:#F0EDE5;">Four pillars. One transformation.</h2>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+        <div style="padding:24px 32px; border-top:1px solid #2D5442; border-right:1px solid #2D5442;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:6px;">
+            <span style="font-family:var(--serif); font-size:32px; font-weight:300; color:var(--forest-lt); line-height:1;">01</span>
+            <span style="font-family:var(--serif); font-size:24px; font-weight:300; color:#F0EDE5;">Automation</span>
+          </div>
+          <div style="font-family:var(--sans); font-size:12px; font-weight:300; color:#8ABBA0; line-height:1.6; padding-left:46px;">Workflows &amp; Infrastructure</div>
+        </div>
+        <div style="padding:24px 32px; border-top:1px solid #2D5442;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:6px;">
+            <span style="font-family:var(--serif); font-size:32px; font-weight:300; color:var(--forest-lt); line-height:1;">02</span>
+            <span style="font-family:var(--serif); font-size:24px; font-weight:300; color:#F0EDE5;">Asset Capture</span>
+          </div>
+          <div style="font-family:var(--sans); font-size:12px; font-weight:300; color:#8ABBA0; line-height:1.6; padding-left:46px;">Photo &amp; Video Production</div>
+        </div>
+        <div style="padding:24px 32px; border-top:1px solid #2D5442; border-right:1px solid #2D5442;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:6px;">
+            <span style="font-family:var(--serif); font-size:32px; font-weight:300; color:var(--forest-lt); line-height:1;">03</span>
+            <span style="font-family:var(--serif); font-size:24px; font-weight:300; color:#F0EDE5;">Brand Identity</span>
+          </div>
+          <div style="font-family:var(--sans); font-size:12px; font-weight:300; color:#8ABBA0; line-height:1.6; padding-left:46px;">System &amp; Positioning</div>
+        </div>
+        <div style="padding:24px 32px; border-top:1px solid #2D5442;">
+          <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:6px;">
+            <span style="font-family:var(--serif); font-size:32px; font-weight:300; color:var(--forest-lt); line-height:1;">04</span>
+            <span style="font-family:var(--serif); font-size:24px; font-weight:300; color:#F0EDE5;">Website</span>
+          </div>
+          <div style="font-family:var(--sans); font-size:12px; font-weight:300; color:#8ABBA0; line-height:1.6; padding-left:46px;">Rebuild &amp; Launch</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #2D5442; padding-top:28px; margin-top:0;">
+        <div style="font-family:var(--serif); font-size:18px; font-style:italic; font-weight:300; color:var(--gold); max-width:560px; line-height:1.5;">Each pillar is designed to compound the others — brand informs website, content fuels automation, photography gives everything a face.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 7. PILLAR 01 — AUTOMATION ═══ -->
+  <div class="slide slide-off on-light" data-chapter="Pillar 01 — Automation">
+    <div class="pillar-wrap">
+      <div class="pillar-top" style="border-bottom-color:#D8D4CC;">
+        <div class="eyebrow mb12">Pillar 01</div>
+        <h2 class="display" style="font-size:44px; font-weight:300; color:#1A2A1A;">Zero Digital Infrastructure</h2>
+        <div class="body-copy mt8" style="font-size:13px; color:#3A3A2E; max-width:580px;">Every competitor — including Sage, which has no B Corp — has more automation than MOR. For a 6–8 person team, this is the highest-leverage fix.</div>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-col" style="border-right-color:#D8D4CC;">
+          <div class="caption mb16" style="color:#8A8A7E;">What gets built</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Online scheduling — Calendly eliminates friction on first prospect contact</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Qualifying intake form with net worth and goals selector</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Email drip nurture for prospects in consideration phase</div>
+          </div>
+        </div>
+        <div class="pillar-col">
+          <div class="caption mb16" style="color:#8A8A7E;">&nbsp;</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Automated blog syndication to LinkedIn, Facebook, and email list</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Client onboarding workflow — DocuSign + welcome sequence</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">SEC Rule 204-2 compliance archiving via Smarsh or PageFreezer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 8. PILLAR 02 — ASSET CAPTURE ═══ -->
+  <div class="slide slide-forest on-forest" data-chapter="Pillar 02 — Asset Capture">
+    <div class="pillar-wrap">
+      <div class="pillar-top" style="border-bottom-color:rgba(255,255,255,0.12);">
+        <div class="eyebrow mb12">Pillar 02</div>
+        <h2 class="display" style="font-size:44px; font-weight:300; color:#F0EDE5;">No Photography.<br>No Video. Anywhere.</h2>
+        <div class="body-copy mt8" style="font-size:13px; max-width:600px;">Matthew Ramer's story — Angel Flight pilot, Civil Air Patrol Major, Forbes honoree, SAMFund director — is a compelling, completely untold film.</div>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-col" style="border-right-color:rgba(255,255,255,0.08);">
+          <div class="caption mb16">On-site production</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage-lt);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Team headshots — unified lighting and art direction for all staff</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage-lt);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Group and environmental photography at Penn Square office</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage-lt);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Client-type lifestyle imagery — compliance-appropriate scenes</div>
+          </div>
+        </div>
+        <div class="pillar-col">
+          <div class="caption mb16">Video storytelling</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--gold);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Founder story — 2–3 minute homepage hero asset</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--gold);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Philanthropy documentation — Angel Flights and volunteer work on film</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--gold);"></div>
+            <div class="pillar-text" style="color:#B0D4C0;">Archival media library for ongoing content use</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 9. PILLAR 03 — BRAND ═══ -->
+  <div class="slide slide-light on-light" data-chapter="Pillar 03 — Brand">
+    <div class="pillar-wrap">
+      <div class="pillar-top" style="border-bottom-color:#D8D4CC;">
+        <div class="eyebrow mb12">Pillar 03</div>
+        <h2 class="display" style="font-size:44px; font-weight:300; color:#1A2A1A;">No Ownable<br>Brand Identity</h2>
+        <div class="body-copy mt8" style="font-size:13px; color:#3A3A2E; max-width:600px;">Brighton Jones owns "Live a Richer Life." Wescott owns "Life-Minded Wealth®." MOR's B Corp credential — its strongest differentiator — needs an equivalent home in the brand.</div>
+      </div>
+      <div class="pillar-body">
+        <div class="pillar-col" style="border-right-color:#D8D4CC;">
+          <div class="caption mb16" style="color:#8A8A7E;">Brand system deliverables</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Brand positioning built from the Triple Bottom Line</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Visual identity — color, typography, photography style, iconography</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">B Corp design integration — woven into visual DNA, not a badge</div>
+          </div>
+        </div>
+        <div class="pillar-col">
+          <div class="caption mb16" style="color:#8A8A7E;">&nbsp;</div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Voice and tone guidelines codifying the "Weekend Reading" register</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Ownable tagline — a phrase MOR can own, not borrow</div>
+          </div>
+          <div class="pillar-item">
+            <div class="pillar-dot" style="background:var(--sage);"></div>
+            <div class="pillar-text" style="color:#3A3A2E;">Compliance-ready templates designed for disclosure from day one</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 10. PILLAR 04 — WEBSITE ═══ -->
+  <div class="slide slide-off on-light" data-chapter="Pillar 04 — Website">
+    <div class="split-wrap">
+      <div class="split-left" style="background:var(--warm);">
+        <div class="eyebrow mb16">Pillar 04</div>
+        <h2 class="display" style="font-size:44px; font-weight:300; color:#1A2A1A; line-height:1.05;">© 2019.<br>Invisible to Search.</h2>
+        <div class="body-copy mt20" style="font-size:13px; color:#3A3A2E; line-height:1.7; margin-top:20px;">
+          MOR does not appear in search results for:<br>
+          <span style="color:var(--sage); font-family:var(--sans); font-size:12px; display:block; margin-top:12px; line-height:2.2; font-style:italic;">
+            "ESG wealth management Philadelphia"<br>
+            "B Corp financial advisor"<br>
+            "Socially responsible investing Philadelphia"
+          </span>
+        </div>
+        <div class="body-copy mt24" style="font-size:13px; color:#5A5A4E; margin-top:20px;">The Wix site has no SEO architecture, no lead capture, and references outdated B Corp statistics.</div>
+      </div>
+      <div class="split-divider" style="background:#D8D4CC;"></div>
+      <div class="split-right" style="background:var(--warm);">
+        <div class="caption mb24" style="color:#8A8A7E;">Full rebuild scope</div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Platform migration: Wix → WordPress or Webflow</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Homepage with hero video, brand promise, B Corp above the fold</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Expanded service pages with ESG/SRI differentiation</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Weekend Reading blog with SEO-optimized editorial structure</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Testimonials section — permitted under SEC Marketing Rule (2022)</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-dot" style="background:var(--sage);"></div>
+          <div class="pillar-text" style="font-size:13px; color:#3A3A2E;">Scheduling + qualifying intake on Contact page</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 11. PHASED APPROACH ═══ -->
+  <div class="slide slide-light on-light" data-chapter="The Engagement">
+    <div class="phase-wrap">
+      <div class="eyebrow mb12">Structured in five phases</div>
+      <h2 class="display mb32" style="font-size:36px; font-weight:300; color:#1A2A1A; margin-bottom:28px;">3–4 Month Program</h2>
+
+      <div class="phase-row" style="border-bottom-color:#D8D4CC; border-top-color:#D8D4CC;">
+        <div class="phase-num-col" style="color:var(--sage);">1</div>
+        <div class="phase-name" style="color:#2B5240;">Narrative &amp; Identity</div>
+        <div class="phase-detail" style="color:#5A5A4E;">Leadership interviews · Story extraction · Messaging architecture · Brand voice</div>
+        <div class="phase-price" style="color:var(--gold);">$12k–18k</div>
+      </div>
+      <div class="phase-row" style="border-bottom-color:#D8D4CC;">
+        <div class="phase-num-col" style="color:var(--sage);">2</div>
+        <div class="phase-name" style="color:#2B5240;">Visual &amp; Cultural Capture</div>
+        <div class="phase-detail" style="color:#5A5A4E;">On-site production · Photography · Video · Archival media library</div>
+        <div class="phase-price" style="color:var(--gold);">$12k–20k</div>
+      </div>
+      <div class="phase-row" style="border-bottom-color:#D8D4CC;">
+        <div class="phase-num-col" style="color:var(--sage);">3</div>
+        <div class="phase-name" style="color:#2B5240;">Digital Infrastructure</div>
+        <div class="phase-detail" style="color:#5A5A4E;">Website · CMS · Editorial platform · Event architecture</div>
+        <div class="phase-price" style="color:var(--gold);">$20k–30k</div>
+      </div>
+      <div class="phase-row" style="border-bottom-color:#D8D4CC;">
+        <div class="phase-num-col" style="color:var(--sage);">4</div>
+        <div class="phase-name" style="color:#2B5240;">Amplification Engine</div>
+        <div class="phase-detail" style="color:#5A5A4E;">AI writing agents · Content workflows · Social automation · Compliance archiving</div>
+        <div class="phase-price" style="color:var(--gold);">$8k–15k</div>
+      </div>
+      <div class="phase-row" style="border-bottom-color:#D8D4CC;">
+        <div class="phase-num-col" style="color:var(--sage);">5</div>
+        <div class="phase-name" style="color:#2B5240;">Organizational Adoption</div>
+        <div class="phase-detail" style="color:#5A5A4E;">Staff training · Workflow documentation · Leadership alignment</div>
+        <div class="phase-price" style="color:var(--sage);">Included</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 12. INVESTMENT — MARKET RATE ═══ -->
+  <div class="slide slide-darker on-dark" data-chapter="Investment">
+    <div class="invest-wrap">
+      <div class="eyebrow mb16" style="color:var(--gold);">Market rate for this engagement</div>
+      <div style="display:flex; align-items:baseline; gap:0; position:relative;">
+        <div class="invest-range" style="opacity:0.7;">$50k</div>
+        <div class="invest-dash" style="opacity:0.7;">–</div>
+        <div class="invest-range" style="opacity:0.7;">$70k</div>
+        <!-- strikethrough rule -->
+        <div style="position:absolute; left:0; right:0; top:50%; height:2px; background:var(--plum); transform:translateY(-50%) rotate(-3deg);"></div>
+      </div>
+      <div class="invest-label" style="opacity:0.7; margin-top:16px;">Strategic Amplification Program · 3–4 months</div>
+
+      <div style="margin-top:40px; padding-top:36px; border-top:1px solid #2D5442; text-align:center;">
+        <div class="eyebrow mb16" style="color:var(--sage-lt);">MOR Wealth Management's investment</div>
+        <div class="invest-range" style="font-size:110px; color:#F0EDE5;">$0</div>
+        <div style="font-family:var(--serif); font-size:20px; font-style:italic; color:var(--gold); margin-top:8px;">Complimentary. In full.</div>
+        <div class="body-copy" style="font-size:13px; color:#A8C0B0; max-width:460px; margin:20px auto 0; line-height:1.7;">
+          Tribal Mischief is offering this engagement gratis. We believe in MOR's mission, we recognize the gap, and we want to build something that demonstrates what strategic amplification looks like when it's done right.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 13. BEFORE / AFTER ═══ -->
+  <div class="slide on-dark" data-chapter="The Transformation">
+    <div style="display:grid; grid-template-columns:1fr 1px 1fr; height:100%;">
+      <div style="background:var(--warm); display:flex; flex-direction:column; justify-content:center; padding:60px 56px;">
+        <div class="eyebrow mb24" style="color:#8A8A7E;">Before</div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:4px; height:4px; background:#C8C4BC; border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#7A7A6E;">© 2019 Wix site, invisible to search</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:4px; height:4px; background:#C8C4BC; border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#7A7A6E;">B Corp credential buried on a subpage</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:4px; height:4px; background:#C8C4BC; border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#7A7A6E;">No photography, no video, no visual story</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:4px; height:4px; background:#C8C4BC; border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#7A7A6E;">Phone/email only — no scheduling, no intake</div>
+        </div>
+        <div class="pillar-item">
+          <div style="width:4px; height:4px; background:#C8C4BC; border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#7A7A6E;">Exceptional impact, no infrastructure to tell it</div>
+        </div>
+      </div>
+      <div style="background:#2B5240; align-self:stretch;"></div>
+      <div style="background:var(--forest); display:flex; flex-direction:column; justify-content:center; padding:60px 56px;">
+        <div class="eyebrow mb24" style="color:var(--gold);">After</div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:5px; height:5px; background:var(--gold); border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#D0E8DA;">Performance-built site ranking for ESG search terms</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:5px; height:5px; background:var(--gold); border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#D0E8DA;">B Corp identity woven into visual DNA and tagline</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:5px; height:5px; background:var(--gold); border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#D0E8DA;">Professional photography and founder story video</div>
+        </div>
+        <div class="pillar-item" style="margin-bottom:18px;">
+          <div style="width:5px; height:5px; background:var(--gold); border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#D0E8DA;">Automated scheduling, intake, and nurture sequences</div>
+        </div>
+        <div class="pillar-item">
+          <div style="width:5px; height:5px; background:var(--gold); border-radius:50%; margin-top:8px; flex-shrink:0;"></div>
+          <div class="body-copy" style="font-size:14px; color:#D0E8DA;">Systems that make MOR feel more like itself, consistently</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 14. CLOSE ═══ -->
+  <div class="slide slide-darker on-dark" data-chapter="Next Steps">
+    <div class="close-wrap">
+      <div class="cover-rule"></div>
+      <div class="eyebrow mb16" style="color:var(--gold);">What comes next</div>
+      <h1 class="display" style="font-size:58px; font-weight:300; color:#F0EDE5; line-height:1.05; max-width:600px;">
+        A 60-minute discovery conversation.
+      </h1>
+      <div class="body-copy mt24" style="font-size:15px; color:#A8C0B0; max-width:480px; line-height:1.7; margin-top:20px;">
+        No obligation. We'll map your specific gaps, align on priorities, and determine whether a phased or full engagement is the right fit for MOR's 2026 timeline.
+      </div>
+      <div class="mt32" style="margin-top:36px; padding-top:28px; border-top:1px solid #1a1f18; display:flex; gap:40px;">
+        <div>
+          <div class="caption mb8" style="color:#7DAE96; margin-bottom:6px;">Ethan Baird</div>
+          <div class="body-copy" style="font-size:12px; color:#8A9B8E;">Tribal Mischief</div>
+          <div class="body-copy" style="font-size:12px; color:#8A9B8E;">Newburyport, MA</div>
+        </div>
+        <div>
+          <div class="caption mb8" style="color:#7DAE96; margin-bottom:6px;">Where Art Finds Audience</div>
+          <div class="body-copy" style="font-size:12px; color:#8A9B8E;">tribalmischief.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<script>
+(function() {
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var current = 0;
+  var counter = document.getElementById('counter');
+  var chapterNav = document.getElementById('chapterNav');
+  var navPrev = document.getElementById('nav-prev');
+  var navNext = document.getElementById('nav-next');
+
+  // Build chapter map
+  var pillarPrefix = 'Pillar ';
+  var pillarParent = 'The Work';
+  var chapters = [];
+  var seen = {};
+  slides.forEach(function(sl, i) {
+    var ch = sl.getAttribute('data-chapter') || '';
+    if (ch && !seen[ch]) {
+      seen[ch] = true;
+      chapters.push({ name: ch, firstSlide: i, isPillar: ch.indexOf(pillarPrefix) === 0 });
+    }
+  });
+
+  // Render sidebar chapters with pillar accordion
+  var pillarContainer = null;
+  var displayNum = 0;
+  var allBtns = [];
+
+  chapters.forEach(function(ch) {
+    if (ch.isPillar) {
+      if (!pillarContainer) {
+        pillarContainer = document.createElement('div');
+        pillarContainer.className = 'chapter-children';
+        chapterNav.appendChild(pillarContainer);
+      }
+      var btn = document.createElement('button');
+      btn.className = 'chapter-btn';
+      btn.setAttribute('data-chapter-name', ch.name);
+      var shortName = ch.name.replace('Pillar ', '').replace(' — ', ' · ');
+      btn.innerHTML =
+        '<div class="chapter-label">' +
+          '<span class="chapter-num">' + ch.name.substring(7, 9) + '</span>' +
+          '<span>' + shortName.substring(shortName.indexOf('·')) + '</span>' +
+        '</div>';
+      btn.addEventListener('click', function() { goTo(ch.firstSlide); });
+      pillarContainer.appendChild(btn);
+      allBtns.push({ el: btn, name: ch.name });
+    } else {
+      displayNum++;
+      var btn = document.createElement('button');
+      btn.className = 'chapter-btn';
+      btn.setAttribute('data-chapter-name', ch.name);
+      btn.innerHTML =
+        '<div class="chapter-label">' +
+          '<span class="chapter-num">' + (displayNum < 10 ? '0' : '') + displayNum + '</span>' +
+          '<span>' + ch.name + '</span>' +
+        '</div>';
+      btn.addEventListener('click', function() { goTo(ch.firstSlide); });
+      chapterNav.appendChild(btn);
+      allBtns.push({ el: btn, name: ch.name });
+    }
+  });
+
+  function currentChapterName() {
+    return slides[current].getAttribute('data-chapter') || '';
+  }
+
+  function updateSidebar() {
+    var chName = currentChapterName();
+    var isPillarActive = chName.indexOf(pillarPrefix) === 0;
+    var isWorkActive = chName === pillarParent;
+
+    allBtns.forEach(function(b) {
+      b.el.classList.toggle('active', b.name === chName);
+    });
+
+    // Also highlight "The Work" parent when a pillar is active
+    if (isPillarActive) {
+      allBtns.forEach(function(b) {
+        if (b.name === pillarParent) b.el.classList.add('active');
+      });
+    }
+
+    // Expand/collapse pillar accordion
+    if (pillarContainer) {
+      if (isPillarActive || isWorkActive) {
+        pillarContainer.classList.add('expanded');
+      } else {
+        pillarContainer.classList.remove('expanded');
+      }
+    }
+  }
+
+  function animateBars(slideEl) {
+    var fills = slideEl.querySelectorAll('.bench-fill');
+    fills.forEach(function(f) {
+      var pct = parseFloat(f.getAttribute('data-pct')) || 0;
+      f.style.width = '0%';
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          f.style.width = pct + '%';
+        });
+      });
+    });
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    var prev = slides[current];
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    setTimeout(function() { prev.classList.remove('exit'); }, 500);
+
+    current = idx;
+    var sl = slides[current];
+    sl.classList.add('active');
+
+    // Bar animation
+    animateBars(sl);
+
+    // Counter
+    counter.textContent = (current + 1) + ' / ' + total;
+
+    // Counter color
+    if (sl.classList.contains('slide-light') || sl.classList.contains('slide-off')) {
+      counter.classList.add('on-light');
+    } else {
+      counter.classList.remove('on-light');
+    }
+
+    updateSidebar();
+  }
+
+  // Init
+  slides[0].classList.add('active');
+  animateBars(slides[0]);
+  counter.textContent = '1 / ' + total;
+  updateSidebar();
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+
+  navPrev.addEventListener('click', function() { goTo(current - 1); });
+  navNext.addEventListener('click', function() { goTo(current + 1); });
+})();
+</script>
+</body>
+</html>
